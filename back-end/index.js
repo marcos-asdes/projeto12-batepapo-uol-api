@@ -134,6 +134,58 @@ async function getMessages(req, res){
 
 /*  */
 
+/*  */
+
+app.post('/status', userStatus)
+
+async function userStatus(req, res) {
+    const { user } = req.headers; //const user = req.header("User");
+    try {
+        const participant = await database.collection('participants').findOne({ name: user });
+        if (!participant) return res.sendStatus(404);
+
+        await database.collection('participants').updateOne({ name: user }, { $set: { lastStatus: Date.now() } });
+        res.sendStatus(200);
+  
+    } catch (e) {
+        console.log(error);
+        res.status(500).send({
+            message: 'Error updating status',
+            detail: error
+        });
+    }
+}
+
+const TIME_TO_CHECK = 15 * 1000; // 15s
+setInterval(async () => {
+    const seconds = Date.now() - (10 * 1000); // 10s
+    try {
+        const inactiveParticipants = await database.collection('participants').find({ lastStatus: { $lte: seconds } }).toArray();
+        if (inactiveParticipants.length > 0) {
+        const inativeMessages = inactiveParticipants.map(inactiveParticipant => {
+            return {
+                from: inactiveParticipant.name,
+                to: 'Todos',
+                text: 'sai da sala...',
+                type: 'status',
+                time: dayjs().format('HH:mm:ss')
+            }
+        });
+
+        await database.collection('messages').insertMany(inativeMessages);
+        await database.collection('participants').deleteMany({ lastStatus: { $lte: seconds } });
+        }
+    } catch (e) {
+        console.log(error);
+        res.status(500).send({
+            message: 'Error removing inactive user',
+            detail: error
+        });
+    }
+}, TIME_TO_CHECK);
+
+/*  */
+
 app.get('/', (_req, res) => {
 	res.send('Online');
 });
