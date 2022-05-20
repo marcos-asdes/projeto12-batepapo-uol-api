@@ -1,12 +1,13 @@
 {
-  "name": "back-end",
+  "name": "projeto12-batepapo-uol-back",
   "version": "1.0.0",
   "type": "module",
-  "description": "project nº12 - bate papo uol api",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "npx nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Marcos Antonio",
